@@ -3,12 +3,12 @@
 # Variables
 AUTH_SERVICE_URL="http://localhost:5000/login"
 DATA_ENTRY_SERVICE_URL="http://localhost:5001/enter-data"
-ANALYTICS_SERVICE_URL="http://localhost:5002/analyze"
+ANALYTICS_SERVICE_URL="http://localhost:5002/calculate_gpa"
 USERNAME="testuser"
 PASSWORD="password"
 SUBJECT="Math"
-GRADE="85"
-CREDIT_HOURS=3
+GRADE="45"
+CREDIT_HOURS=2
 STUDENT_ID="12345"
 
 # Function to get JWT token
@@ -27,7 +27,7 @@ insert_grade_data() {
 
 # Function to analyze data
 analyze_data() {
-    response=$(curl -s -X GET "$ANALYTICS_SERVICE_URL/$STUDENT_ID")
+    response=$(curl -s -X GET "$ANALYTICS_SERVICE_URL?student_id=$STUDENT_ID")
     echo $response
 }
 
