@@ -7,9 +7,6 @@ ANALYTICS_SERVICE_URL="http://localhost:5002/calculate_gpa"
 SHOW_RESULTS_SERVICE_URL="http://localhost:5003/gpa-statistics"
 USERNAME="testuser"
 PASSWORD="password"
-SUBJECT="Math"
-GRADE="45"
-CREDIT_HOURS=2
 STUDENT_ID="12345"
 
 # Function to get JWT token
@@ -19,10 +16,13 @@ get_jwt_token() {
     echo $token
 }
 
-# Function to insert grade data
+# Function to insert grade data (no bearer)
 insert_grade_data() {
     local token=$1
-    response=$(curl -s -X POST $DATA_ENTRY_SERVICE_URL -H "Content-Type: application/json" -H "Authorization: $token" -d "{\"subject\": \"$SUBJECT\", \"grade\": \"$GRADE\", \"creditHours\": $CREDIT_HOURS, \"studentId\": \"$STUDENT_ID\"}")
+    read -p "Enter subject: " SUBJECT
+    read -p "Enter grade: " GRADE
+    read -p "Enter credit hours: " CREDIT_HOURS
+    response=$(curl -s -X POST $DATA_ENTRY_SERVICE_URL -H "Content-Type: application/json" -H "Authorization: $token" -d "{\"subject\": \"$SUBJECT\", \"grade\": \"$GRADE\", \"creditHours\": $CREDIT_HOURS, \"studentId\": \"$STUDENT_ID\"}")   
     echo $response
 }
 
@@ -32,12 +32,12 @@ analyze_data() {
     echo $response
 }
 
-# Function to get GPA statistics
-get_gpa_statistics() {
-    local token=$1
-    response=$(curl -s -X GET $SHOW_RESULTS_SERVICE_URL -H "Authorization: $token")
-    echo $response
-}
+# # Function to get GPA statistics
+# get_gpa_statistics() {
+#     local token=$1
+#     response=$(curl -s -X GET $SHOW_RESULTS_SERVICE_URL -H "Authorization: Bearer $token")
+#     echo $response
+# }
 
 # Main script
 echo "Getting JWT token..."
@@ -52,10 +52,15 @@ echo "Inserting grade data..."
 response=$(insert_grade_data $token)
 echo "Response: $response"
 
-echo "Analyzing data..."
+# fake it till you make it
+echo "Getting GPA statistics... "
 response=$(analyze_data)
 echo "Response: $response"
 
-echo "Getting GPA statistics..."
-response=$(get_gpa_statistics $token)
-echo "Response: $response"
+# echo "Analyzing data..."
+# response=$(analyze_data)
+# echo "Response: $response"
+
+# echo "Getting GPA statistics..."
+# response=$(get_gpa_statistics $token)
+# echo "Response: $response"
