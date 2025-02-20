@@ -1,5 +1,6 @@
 flask
 pymysql
 pymongo
-jwt
+pyjwt
 flask_pymongo
+requests

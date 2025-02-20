@@ -31,15 +31,26 @@ app.post('/login', (req, res) => {
 
 // Middleware: Validate JWT Token
 function authenticateToken(req, res, next) {
-    const token = req.headers['authorization'];
-    if (!token) return res.status(403).json({ message: "No token provided" });
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Extract token after "Bearer"
+
+    if (!token) {
+        return res.status(403).json({ message: "No token provided" });
+    }
 
     jwt.verify(token, SECRET_KEY, (err, user) => {
-        if (err) return res.status(403).json({ message: "Invalid token" });
+        if (err) {
+            return res.status(403).json({ message: "Invalid token" });
+        }
         req.user = user;
         next();
     });
 }
+
+// Verify Token API
+app.post('/verify', authenticateToken, (req, res) => {
+    res.json(req.user);
+});
 
 // Example Protected Route (Just to Test Authentication)
 app.get('/protected', authenticateToken, (req, res) => {
