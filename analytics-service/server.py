@@ -34,6 +34,7 @@ try:
     mongo_client = MongoClient("mongodb://mongo:27017")
     db = mongo_client.gpa_analytics_db
     gpas_collection = db.gpas
+    analytics_collection = db.analytics
     print('Connected to MongoDB')
 except pymongo.errors.ConnectionError as err:
     print(f'Error connecting to MongoDB: {err}')
@@ -104,6 +105,14 @@ def calculate_and_store_gpa():
 
     # Calculate GPA statistics for this student
     gpa_stats = calculate_student_gpa_statistics(student_id)
+
+    # Insert GPA statistics into MongoDB
+    analytics_collection.insert_one({
+    'student_id': student_id,
+    'min_gpa': gpa_stats['min_gpa'],
+    'max_gpa': gpa_stats['max_gpa'],
+    'avg_gpa': gpa_stats['avg_gpa']
+})
 
     # Return the calculated GPA and statistics as a response
     return jsonify({

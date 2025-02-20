@@ -7,7 +7,7 @@ ANALYTICS_SERVICE_URL="http://localhost:5002/calculate_gpa"
 SHOW_RESULTS_SERVICE_URL="http://localhost:5003/gpa-statistics"
 USERNAME="testuser"
 PASSWORD="password"
-STUDENT_ID="12345"
+STUDENT_ID="1"
 
 # Function to get JWT token
 get_jwt_token() {
@@ -32,12 +32,12 @@ analyze_data() {
     echo $response
 }
 
-# # Function to get GPA statistics
-# get_gpa_statistics() {
-#     local token=$1
-#     response=$(curl -s -X GET $SHOW_RESULTS_SERVICE_URL -H "Authorization: Bearer $token")
-#     echo $response
-# }
+# Function to get GPA statistics
+get_gpa_statistics() {
+    local token=$1
+    response=$(curl -s -X GET $SHOW_RESULTS_SERVICE_URL -H "Authorization: Bearer $token")
+    echo $response
+}
 
 # Main script
 echo "Getting JWT token..."
@@ -52,15 +52,15 @@ echo "Inserting grade data..."
 response=$(insert_grade_data $token)
 echo "Response: $response"
 
-# fake it till you make it
-echo "Getting GPA statistics... "
-response=$(analyze_data)
-echo "Response: $response"
-
-# echo "Analyzing data..."
+# # fake it till you make it
+# echo "Getting GPA statistics... "
 # response=$(analyze_data)
 # echo "Response: $response"
 
-# echo "Getting GPA statistics..."
-# response=$(get_gpa_statistics $token)
-# echo "Response: $response"
+echo "Analyzing data..."
+response=$(analyze_data)
+echo "Response: $response"
+
+echo "Getting GPA statistics..."
+response=$(get_gpa_statistics $token)
+echo "Response: $response"
