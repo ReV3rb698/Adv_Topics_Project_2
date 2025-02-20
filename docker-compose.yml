@@ -61,7 +61,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./database-init/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js  # Mount the init script
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js  # Mount the init script
     networks:
       - app_network
 
