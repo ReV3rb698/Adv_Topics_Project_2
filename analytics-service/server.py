@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# MySQL connection
+# MySQL connection configuration
 mysql_config = {
     'host': 'mysql',
     'user': 'root',
@@ -26,7 +26,7 @@ def connect_with_retry():
             time.sleep(5)  # Retry after 5 seconds
     return connection
 
-# Create a connection
+# Create a MySQL connection
 mysql_connection = connect_with_retry()
 
 # MongoDB connection
@@ -61,31 +61,57 @@ def calculate_gpa(grades_and_credit_hours):
         return 0  # Avoid division by zero if no credit hours
     return total_grades / total_credit_hours
 
-# Route to get GPA for a student and store in MongoDB
+# Function to calculate min, max, and avg GPA for a specific student
+def calculate_student_gpa_statistics(student_id):
+    student_gpas = list(gpas_collection.find({"student_id": student_id}, {'gpa': 1, '_id': 0}))
+    gpa_values = [gpa['gpa'] for gpa in student_gpas]
+
+    if len(gpa_values) == 0:
+        return None  # No GPAs to calculate statistics
+
+    min_gpa = min(gpa_values)
+    max_gpa = max(gpa_values)
+    avg_gpa = sum(gpa_values) / len(gpa_values)
+
+    return {
+        'min_gpa': min_gpa,
+        'max_gpa': max_gpa,
+        'avg_gpa': round(avg_gpa, 2)
+    }
+
+# Route to calculate and return GPA statistics for a student
 @app.route('/calculate_gpa', methods=['GET'])
 def calculate_and_store_gpa():
     student_id = request.args.get('student_id')
-    
+
     if not student_id:
         return jsonify({'error': 'Student ID is required'}), 400
 
     # Get grades and credit_hours from MySQL
     grades_and_credit_hours = get_grades_and_credit_hours(student_id)
-    
+
     if not grades_and_credit_hours:
         return jsonify({'error': 'No grades found for this student'}), 404
 
     # Calculate GPA
     gpa = calculate_gpa(grades_and_credit_hours)
 
-    # Insert GPA into MongoDB
+    # Insert GPA into MongoDB for the student
     gpas_collection.insert_one({
         'student_id': student_id,
         'gpa': gpa
     })
 
-    # Return the calculated GPA as a response
-    return jsonify({'student_id': student_id, 'gpa': gpa})
+    # Calculate GPA statistics for this student
+    gpa_stats = calculate_student_gpa_statistics(student_id)
+
+    # Return the calculated GPA and statistics as a response
+    return jsonify({
+        'student_id': student_id,
+        'gpa': gpa,
+        'gpa_statistics': gpa_stats
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)
+
