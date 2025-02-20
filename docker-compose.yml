@@ -46,7 +46,7 @@ services:
     ports:
       - "3308:3306"
     volumes:
-      - ./database-init/init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the init.sql file
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - app_network
     healthcheck:
@@ -55,8 +55,6 @@ services:
       timeout: 30s
       retries: 5
       start_period: 30s
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   mongo:
     image: mongo:latest
