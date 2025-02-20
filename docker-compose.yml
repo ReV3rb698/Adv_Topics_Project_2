@@ -56,7 +56,7 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   mongo:
-    image: mongo:latest
+    image: rev3rb698/project-1:v1.0
     restart: always
     ports:
       - "27017:27017"
