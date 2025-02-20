@@ -1,3 +1,5 @@
 flask
 pymysql
 pymongo
+jwt
+flask_pymongo
