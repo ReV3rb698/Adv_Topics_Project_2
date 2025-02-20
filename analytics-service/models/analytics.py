@@ -1,13 +1,30 @@
 import pymysql
 import pymongo
+import time
 
 # MySQL connection
-mysql_connection = pymysql.connect(
-    host='mysql',
-    user='root',
-    password='root',
-    database='student_db'
-)
+mysql_config = {
+    'host': 'mysql',
+    'user': 'root',
+    'password': 'root',
+    'database': 'student_db'
+}
+
+# Function to create a connection with retry mechanism
+def connect_with_retry():
+    connection = None
+    while connection is None:
+        try:
+            connection = pymysql.connect(**mysql_config)
+            print('Connected to MySQL')
+        except pymysql.MySQLError as err:
+            print(f'Error connecting to MySQL: {err}')
+            time.sleep(5)  # Retry after 5 seconds
+    return connection
+
+# Create a connection
+mysql_connection = connect_with_retry()
+
 
 # MongoDB connection
 mongo_client = pymongo.MongoClient('mongodb://mongo:27017')
