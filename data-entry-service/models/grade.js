@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 const dbConfig = {
     host: 'mysql',
     user: 'root',
-    password: 'root',
+    password: 'root',  // Ensure this matches the MySQL container's root password
     database: 'student_db'
 };
 
@@ -21,6 +21,15 @@ function connectWithRetry() {
         }
     });
 
+    connection.on('error', (err) => {
+        console.error('MySQL connection error:', err);
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+            connectWithRetry();
+        } else {
+            throw err;
+        }
+    });
+
     return connection;
 }
 
@@ -31,7 +40,13 @@ const connection = connectWithRetry();
 const Grade = {
     create: (subject, grade, creditHours, studentId, callback) => {
         const query = 'INSERT INTO grades (subject, grade, credit_hours, student_id) VALUES (?, ?, ?, ?)';
-        connection.query(query, [subject, grade, creditHours, studentId], callback);
+        connection.query(query, [subject, grade, creditHours, studentId], (err, results) => {
+            if (err) {
+                console.error('Error executing query:', err);
+                return callback(err);
+            }
+            callback(null, results);
+        });
     },
     // Add more methods for reading, updating, deleting grades
 };
