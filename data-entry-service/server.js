@@ -1,29 +1,51 @@
 const express = require('express');
-const Grade = require('./models/grade');
+const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
+const Grade = require('./models/grade.js');  // Your Grade model
+
 const app = express();
-app.use(express.json());
+const port = 5001;  // You can change the port if needed
 
-// Authentication middleware (simplified)
+// Secret Key for JWT (should be the same as in auth-service)
+const SECRET_KEY = "my_super_secret_key";
+
+// Middleware to parse JSON bodies
+app.use(bodyParser.json());
+
+// Authentication middleware
 const authenticate = (req, res, next) => {
-    const token = req.headers['authorization'];
-    if (!token) return res.status(403).json({ message: 'No token provided' });
+    const token = req.header('authorization');
+    if (!token) {
+        return res.status(403).send('Forbidden');
+    }
 
-    jwt.verify(token, 'secretkey', (err, decoded) => {
-        if (err) return res.status(401).json({ message: 'Invalid token' });
-        req.user = decoded;  // Attach user info to request
+    jwt.verify(token, SECRET_KEY, (err, user) => {
+        if (err) {
+            return res.status(403).send('Invalid token');
+        }
+        req.user = user;
         next();
     });
 };
 
-app.post('/enter-grade', authenticate, (req, res) => {
-    const { subject, grade, creditHours } = req.body;
-    const studentId = req.user.studentId;
+// Route to enter grade data
+app.post('/enter-data', authenticate, (req, res) => {
+    const { subject, grade, creditHours, studentId } = req.body;
 
-    Grade.create(subject, grade, creditHours, studentId, (err, result) => {
-        if (err) return res.status(500).json({ message: 'Error adding grade' });
-        res.status(200).json({ message: 'Grade added' });
+    if (!subject || !grade || !creditHours || !studentId) {
+        return res.status(400).send('Missing required fields');
+    }
+
+    // Use the Grade model to insert the data
+    Grade.create(subject, grade, creditHours, studentId, (err, results) => {
+        if (err) {
+            return res.status(500).send('Error inserting data');
+        }
+        res.status(201).send({ message: 'Grade added successfully', id: results.insertId });
     });
 });
 
-app.listen(5001, () => console.log('Data entry service running on port 5001'));
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
