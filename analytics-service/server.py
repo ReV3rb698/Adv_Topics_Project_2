@@ -62,22 +62,22 @@ def calculate_gpa(grades_and_credit_hours):
         return 0  # Avoid division by zero if no credit hours
     return total_grades / total_credit_hours
 
-# Function to calculate min, max, and avg GPA for a specific student
-def calculate_student_gpa_statistics(student_id):
-    student_gpas = list(gpas_collection.find({"student_id": student_id}, {'gpa': 1, '_id': 0}))
-    gpa_values = [gpa['gpa'] for gpa in student_gpas]
+# Function to calculate min, max, and avg grade for a specific student
+def calculate_student_grade_statistics(student_id):
+    grades_and_credit_hours = get_grades_and_credit_hours(student_id)
+    grades = [grade for grade, _ in grades_and_credit_hours]
 
-    if len(gpa_values) == 0:
-        return None  # No GPAs to calculate statistics
+    if len(grades) == 0:
+        return None  # No grades to calculate statistics
 
-    min_gpa = min(gpa_values)
-    max_gpa = max(gpa_values)
-    avg_gpa = sum(gpa_values) / len(gpa_values)
+    min_grade = min(grades)
+    max_grade = max(grades)
+    avg_grade = sum(grades) / len(grades)
 
     return {
-        'min_gpa': min_gpa,
-        'max_gpa': max_gpa,
-        'avg_gpa': round(avg_gpa, 2)
+        'min_grade': min_grade,
+        'max_grade': max_grade,
+        'avg_grade': round(avg_grade, 2)
     }
 
 # Route to calculate and return GPA statistics for a student
@@ -104,21 +104,21 @@ def calculate_and_store_gpa():
     })
 
     # Calculate GPA statistics for this student
-    gpa_stats = calculate_student_gpa_statistics(student_id)
+    grade_stats = calculate_student_grade_statistics(student_id)
 
     # Insert GPA statistics into MongoDB
     analytics_collection.insert_one({
-    'student_id': student_id,
-    'min_gpa': gpa_stats['min_gpa'],
-    'max_gpa': gpa_stats['max_gpa'],
-    'avg_gpa': gpa_stats['avg_gpa']
-})
+        'student_id': student_id,
+        'min_grade': grade_stats['min_grade'],
+        'max_grade': grade_stats['max_grade'],
+        'avg_grade': grade_stats['avg_grade']
+    })
 
     # Return the calculated GPA and statistics as a response
     return jsonify({
         'student_id': student_id,
         'gpa': gpa,
-        'gpa_statistics': gpa_stats
+        'gpa_statistics': grade_stats
     })
 
 if __name__ == '__main__':
