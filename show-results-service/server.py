@@ -1,19 +1,16 @@
-from flask import Flask, jsonify
-import pymongo
+from flask import Flask
+from models.analytics import get_gpa, get_analytics
 
 app = Flask(__name__)
 
-mongo_client = pymongo.MongoClient("mongodb://mongo:27017/")
-mongo_db = mongo_client["analytics_db"]
-analytics_collection = mongo_db["stats"]
-
-@app.route('/results', methods=['GET'])
-def get_results():
-    result = analytics_collection.find_one(sort=[("_id", -1)])
-    if not result:
-        return jsonify({"message": "No analytics available"})
+@app.route('/results/<student_id>', methods=['GET'])
+def show_results(student_id):
+    gpa = get_gpa(student_id)
+    if gpa is None:
+        return {"message": "No GPA data available"}
     
-    del result["_id"]  # Remove MongoDB ObjectId
-    return jsonify(result)
+    analytics = get_analytics()
+    return {"gpa": gpa, "analytics": analytics}
 
-app.run(host='0.0.0.0', port=5003)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5003)
