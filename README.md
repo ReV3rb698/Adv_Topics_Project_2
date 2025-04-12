@@ -179,18 +179,3 @@ Now we can see that the pods are getting a lot of cpu usage, so they start repli
 
 
 
-## Project Structure
-
-```
-Adv_Topics_Project_2/
-├── auth-service/
-├── data-entry-service/
-├── analytics-service/
-├── show-results-service/
-├── index.html
-├── init.sql
-├── init-mongo.js
-├── k8s-manifests.yaml
-└── README.md
-```
-
