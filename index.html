@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microservices Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        input, button {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Microservices Demo</h1>
+        <div id="login-section">
+            <h2>Login</h2>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+        </div>
+        <div id="data-entry-section" style="display: none;">
+            <h2>Enter Data</h2>
+            <input type="text" id="subject" placeholder="Subject">
+            <input type="number" id="grade" placeholder="Grade">
+            <input type="number" id="creditHours" placeholder="Credit Hours">
+            <button onclick="enterData()">Submit Data</button>
+        </div>
+        <div id="analytics-section" style="display: none;">
+            <h2>Analytics</h2>
+            <button onclick="fetchAnalytics()">Get Analytics</button>
+            <div id="analytics-response" class="response"></div>
+        </div>
+    </div>
+
+    <script>
+        const AUTH_SERVICE_URL = "http://localhost:5000/login";
+        const DATA_ENTRY_SERVICE_URL = "http://localhost:5001/enter-data";
+        const ANALYTICS_SERVICE_URL = "http://localhost:5002/calculate_gpa";
+        const SHOW_RESULTS_SERVICE_URL = "http://localhost:5003/gpa-statistics";
+        let token = "";
+
+        async function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            const response = await fetch(AUTH_SERVICE_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                token = data.token;
+                alert("Login successful!");
+                document.getElementById("login-section").style.display = "none";
+                document.getElementById("data-entry-section").style.display = "block";
+                document.getElementById("analytics-section").style.display = "block";
+            } else {
+                alert("Login failed: " + data.message);
+            }
+        }
+
+        async function enterData() {
+            const subject = document.getElementById("subject").value;
+            const grade = document.getElementById("grade").value;
+            const creditHours = document.getElementById("creditHours").value;
+
+            const response = await fetch(DATA_ENTRY_SERVICE_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ subject, grade, creditHours, studentId: "1" })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert("Data submitted successfully!");
+            } else {
+                alert("Failed to submit data: " + data.message);
+            }
+        }
+
+        async function fetchAnalytics() {
+            const response = await fetch(SHOW_RESULTS_SERVICE_URL, {
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            const data = await response.json();
+            const analyticsResponse = document.getElementById("analytics-response");
+            if (response.ok) {
+                analyticsResponse.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } else {
+                analyticsResponse.innerHTML = `<p>Error: ${data.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

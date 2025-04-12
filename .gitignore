@@ -1,0 +1,47 @@
+# Node.js
+**/node_modules/
+**/package-lock.json
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/.Python
+**/env/
+**/venv/
+**/.venv/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Docker & Kubernetes
+*.tar
+*.pid
+*.sock
+*.bak
+
+# Local k8s test manifests or overrides
+*.local.yaml
+*.test.yaml
+
+# VS Code / JetBrains IDEs
+.vscode/
+.idea/
+
+# Test & Dev
+demo.sh
+test.sh
+.env
+.env.*
+
+# Git-specific
+.git/
+*.swp
+
+docker-compose.yml
