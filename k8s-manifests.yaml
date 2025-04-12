@@ -23,9 +23,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: node:18
-          command: ["sh", "-c", "npm install && npm start"]
-          workingDir: /app
+          image: rev3rb698/auth-service:latest
           ports:
           - containerPort: 5000
           resources:
@@ -35,6 +33,7 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+
 
 ---
 apiVersion: v1
@@ -71,9 +70,7 @@ spec:
     spec:
       containers:
       - name: data-entry-service
-        image: node:18
-        command: ["npm", "start"]
-        workingDir: /app
+        image: rev3rb698/data-entry-service:latest
         ports:
         - containerPort: 5001
         resources:
@@ -83,13 +80,6 @@ spec:
           limits:
             cpu: "500m"
             memory: "256Mi"
-        volumeMounts:
-        - name: data-entry-code
-          mountPath: /app
-      volumes:
-      - name: data-entry-code
-        hostPath:
-          path: ./data-entry-service
 ---
 apiVersion: v1
 kind: Service
@@ -124,26 +114,17 @@ spec:
         app: analytics-service
     spec:
       containers:
-      - name: analytics-service
-        image: python:3.9
-        command: ["python", "server.py"]
-        workingDir: /app
-        ports:
-        - containerPort: 5002
-        resources:
-          requests:
-            cpu: "250m"
-            memory: "256Mi"
-          limits:
-            cpu: "1"
-            memory: "512Mi"
-        volumeMounts:
-        - name: analytics-code
-          mountPath: /app
-      volumes:
-      - name: analytics-code
-        hostPath:
-          path: ./analytics-service
+        - name: analytics-service
+          image: rev3rb698/analytics-service:latest
+          ports:
+          - containerPort: 5002
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
 ---
 apiVersion: v1
 kind: Service
@@ -179,9 +160,7 @@ spec:
     spec:
       containers:
       - name: show-results-service
-        image: python:3.9
-        command: ["python", "server.py"]
-        workingDir: /app
+        image: rev3rb698/show-results-service:latest
         ports:
         - containerPort: 5003
         resources:
@@ -191,13 +170,6 @@ spec:
           limits:
             cpu: "500m"
             memory: "256Mi"
-        volumeMounts:
-        - name: show-results-code
-          mountPath: /app
-      volumes:
-      - name: show-results-code
-        hostPath:
-          path: ./show-results-service
 ---
 apiVersion: v1
 kind: Service
@@ -233,7 +205,7 @@ spec:
     spec:
       containers:
       - name: html-service
-        image: nginx:latest
+        image: rev3rb698/html-service:latest
         ports:
         - containerPort: 80
         resources:
@@ -243,13 +215,6 @@ spec:
           limits:
             cpu: "200m"
             memory: "128Mi"
-        volumeMounts:
-        - name: html-code
-          mountPath: /usr/share/nginx/html
-      volumes:
-      - name: html-code
-        hostPath:
-          path: ./index.html
 ---
 apiVersion: v1
 kind: Service
@@ -267,6 +232,61 @@ spec:
 
 ---
 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: project1
+spec:
+  selector:
+    app: mysql
+  ports:
+  - port: 3306
+    targetPort: 3306
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: project1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        - name: MYSQL_DATABASE
+          value: student_db
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+
+      volumes:
+      - name: mysql-persistent-storage
+        emptyDir: {}
+---
 # Horizontal Pod Autoscaler for Data Entry Service
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -287,3 +307,4 @@ spec:
       target:
         type: Utilization
         averageUtilization: 50
+

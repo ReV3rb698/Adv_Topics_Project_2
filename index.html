@@ -52,10 +52,12 @@
     </div>
 
     <script>
-        const AUTH_SERVICE_URL = "http://localhost:5000/login";
-        const DATA_ENTRY_SERVICE_URL = "http://localhost:5001/enter-data";
-        const ANALYTICS_SERVICE_URL = "http://localhost:5002/calculate_gpa";
-        const SHOW_RESULTS_SERVICE_URL = "http://localhost:5003/gpa-statistics";
+        // Calls go through html-service's Nginx reverse proxy
+        const AUTH_SERVICE_URL = "/auth/login";
+        const DATA_ENTRY_SERVICE_URL = "/data/enter-data";
+        const ANALYTICS_SERVICE_URL = "/analytics/calculate_gpa";
+        const SHOW_RESULTS_SERVICE_URL = "/results/gpa-statistics";
+
         let token = "";
 
         async function login() {
