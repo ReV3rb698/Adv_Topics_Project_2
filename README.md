@@ -171,7 +171,7 @@ Now we are able to enter some data to send to the dashboard!
 ![Jmeter Count](jmeter_user_count.png)
 ![Request](request_to_send.png)
 
-We are simulating 2000 users trying to use this service using jmeter
+We are simulating 2000 users trying to use this service using jmeter (on an infinite loop to ensure high CPU usage)
 
 ![Pods Dying](pods_feeling_heat.png)
 
