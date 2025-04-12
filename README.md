@@ -177,5 +177,28 @@ We are simulating 2000 users trying to use this service using jmeter (on an infi
 
 Now we can see that the pods are getting a lot of cpu usage, so they start replicating themselves up to 10 replicas
 
+```yaml
+# Horizontal Pod Autoscaler for Data Entry Service
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: data-entry-hpa
+  namespace: project1
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: data-entry-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+```
 
+With the Autoscaler, it managed to replicate itself in order to handle the thousands of connections coming in
 
