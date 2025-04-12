@@ -91,22 +91,6 @@ This opens your static frontend in the browser (served via Nginx).
 
 ---
 
-## Test Horizontal Scaling
-
-Ensure metrics server is enabled:
-
-```bash
-minikube addons enable metrics-server
-```
-
-Then generate load (via `hey` or `curl` loop) against `data-entry-service`, and monitor:
-
-```bash
-kubectl get hpa -n project1 -w
-```
-
----
-
 ## Deploying to EKS (Amazon Elastic Kubernetes Service)
 
 ### 1. Push Docker Images to Docker Hub
